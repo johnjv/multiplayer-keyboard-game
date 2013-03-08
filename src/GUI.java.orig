@@ -1,0 +1,165 @@
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+
+import javax.swing.*;
+
+@SuppressWarnings("serial")
+public class GUI extends JFrame {
+
+	private JPanel playerPanel;
+	private JPanel finishPanel;
+	private JPanel wordPanel;
+	private TypingConsole typingConsole;
+	private Controller controller;
+	private Container contents;
+	
+	private int PLAYER_PANEL_HEIGHT = 550;
+	private int PLAYER_PANEL_WIDTH = 850;
+
+	public static void main(String[] args) {
+		JFrame window = new GUI();
+		window.setBackground(Color.WHITE);
+		window.setVisible(true);
+	}
+	
+	public GUI() {
+		super("Type Racer");
+		set();
+		finishPanel();
+		wordPanel();
+		playerPanel();
+		requirements();
+	}
+
+	public void set() {
+		this.setSize(900, 600);
+		//this.setLayout(new BorderLayout());
+		this.setLayout(null);
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setVisible(true);
+		
+		this.contents = getContentPane();
+		typingConsole = new TypingConsole();
+		controller = new Controller();
+	}
+
+	public void playerPanel() {
+		playerPanel = new JPanel() {
+			public void paintComponent(Graphics g) {
+				System.out.println("repaint");
+				playerPanel.setBackground(Color.CYAN);
+			}
+		};
+		contents.add(playerPanel);
+		playerPanel.setLayout(null);
+		playerPanel.setLocation(0,0);
+		playerPanel.setSize(PLAYER_PANEL_WIDTH, PLAYER_PANEL_HEIGHT);
+		playerPanel.setVisible(true);
+		playerPanel.setBackground(Color.CYAN);
+		
+		//player = new Player(4);
+		//playerPanel.add(player);
+	}
+
+	public void finishPanel() {
+		finishPanel = new JPanel();
+		finishPanel.setLayout(null);
+		finishPanel.setLocation(850, 0);
+		finishPanel.setSize(550, 50);
+		
+		JLabel finish = new JLabel("FINISH");
+		
+		
+		finishPanel.add(finish);
+		finishPanel.setBackground(Color.MAGENTA);
+		//contents.add(finishPanel, BorderLayout.EAST);
+		contents.add(finishPanel);
+	}
+
+	public void wordPanel() {
+		wordPanel = new JPanel(new GridLayout(1, 1));
+		wordPanel.add(typingConsole.getWordToType().getJTextPane(), BorderLayout.EAST);
+		wordPanel.add(typingConsole.getJTextField(), BorderLayout.WEST);
+		wordPanel.setBackground(Color.BLACK);
+		//contents.add(wordPanel, BorderLayout.SOUTH);
+		contents.add(wordPanel);
+	}
+
+	public void requirements() {
+		final JDialog startInput = new JDialog(this);
+		startInput.setSize(250,100);
+		startInput.setLayout(new GridLayout(3,1));
+		startInput.setLocation(350,300);
+		startInput.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		
+		Container startInputPane = startInput.getContentPane();
+		
+		final JTextField playerName = new JTextField("Username");
+		playerName.addFocusListener(new FocusListener() {
+			public void focusGained(FocusEvent e) {
+				JTextField pntf = (JTextField) e.getSource();
+				pntf.setText(null);
+			}
+
+			public void focusLost(FocusEvent arg0) {
+				// Intentionally left blank
+			}
+		});
+		
+		final JTextField computer = new JTextField("Connect to...");
+		computer.addFocusListener(new FocusListener() {
+			public void focusGained(FocusEvent e) {
+				JTextField ctf = (JTextField) e.getSource();
+				ctf.setText(null);
+			}
+
+			public void focusLost(FocusEvent arg0) {
+				// Intentionally left blank
+			}
+		});
+		
+		
+		JButton connect = new JButton("Connect and play!");
+		connect.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String username = playerName.getText();
+				String connectTo = computer.getText();
+				
+				System.out.println("Name: " + username + " is connecting to: " + connectTo);
+				
+				GUI.this.checkUsername(username);
+				//GUI.this.checkConnection(connectTo);
+				
+				controller.setUsername(username);
+				controller.establishConnection(connectTo);
+				
+				startInput.setVisible(false);
+			}
+		});
+
+		startInputPane.add(playerName);
+		startInputPane.add(computer);
+		startInputPane.add(connect);
+		startInput.setVisible(true);
+	}
+
+	@SuppressWarnings("static-access")
+	private void checkUsername(String username) {
+		JOptionPane error = new JOptionPane();
+		try{
+			if (username.isEmpty()) {
+				error.showMessageDialog(null,
+						"Cannot leave name empty", "Error",
+						JOptionPane.ERROR_MESSAGE);
+				requirements();
+			}
+		}catch(java.lang.NullPointerException e){
+			System.out.println(e.getMessage());
+			error.showMessageDialog(null, "Cannot have name as \"null\" ", "Error",JOptionPane.ERROR_MESSAGE);
+			requirements();
+		}
+	}
+}
