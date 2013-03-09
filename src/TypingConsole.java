@@ -1,28 +1,20 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import javax.swing.*;
+
+import javax.swing.JFrame;
 import javax.swing.text.*;
 
 public class TypingConsole implements KeyListener {
-	private JTextField typingConsole;
 	private ArrayList<Character> userInputtedWord; 
 	private WordToType challengeWord;
 	private Controller controller;
 
 	public TypingConsole() {
-		typingConsole = new JTextField();
-		typingConsole.addKeyListener(this);
-		typingConsole.setFont(new Font("Serif", 0, 20));
-
 		userInputtedWord = new ArrayList<Character>();
 
 		challengeWord = new WordToType();
 		challengeWord.getJTextPane().addKeyListener(this);
-	}
-
-	public JTextField getJTextField() {
-		return typingConsole;
 	}
 
 	public WordToType getWordToType() {
@@ -33,33 +25,45 @@ public class TypingConsole implements KeyListener {
 		this.controller = controller;
 	}
 
-	public void printuserInputtedWord() {
+	public void printUserInputtedWord() {
 		for (int i = 0; i < userInputtedWord.size(); i++) {
 			System.out.print(userInputtedWord.get(i));
 		}
 		System.out.print("\n");
 	}
 
+	private void setGreenStyle() { //TODO rename
+		StyledDocument document = challengeWord.getStyledDocument();
+		Style correctStyle = challengeWord.getJTextPane().addStyle("Green", null);
+
+		StyleConstants.setForeground(correctStyle, Color.green);
+		StyleConstants.setBold(correctStyle, true);
+		document.setCharacterAttributes(0, userInputtedWord.size(), challengeWord.getJTextPane().getStyle("Green"), true);
+		
+		/*
+		StyleConstants.setBackground(correctStyle, green);
+		try {
+			document.insertString(document.getLength(), "Some Text", correctStyle);
+		} catch (BadLocationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		 */
+	}
 	public void checkIfCorrect() {
 		String correctWord = challengeWord.getWord();
-
 		int index = userInputtedWord.size() - 1;
-		StyledDocument document = challengeWord.getStyledDocument();
-
-		StringBuilder wordToCheck = new StringBuilder();
+		
+		StringBuilder wordToCheck = new StringBuilder(); //TODO could build this into method
 		for (int i = 0; i < userInputtedWord.size(); i++) {
 			wordToCheck.append(userInputtedWord.get(i));
 		}
 
 		if (userInputtedWord.get(index) == challengeWord.getCharacter(index)) {
-			Style correctStyle = challengeWord.getJTextPane().addStyle("Green",
-					null);
-			StyleConstants.setForeground(correctStyle, Color.green);
-			StyleConstants.setBold(correctStyle, true);
-			document.setCharacterAttributes(0, userInputtedWord.size(),
-					challengeWord.getJTextPane().getStyle("Green"), true);
-		} else if (userInputtedWord.get(index) != challengeWord
-				.getCharacter(index)) {
+			setGreenStyle();
+			
+			
+		} else if (userInputtedWord.get(index) != challengeWord.getCharacter(index)) {
 			System.out.println("INCORRECT");
 			userInputtedWord.clear(); 
 			challengeWord.setNewWord();
@@ -71,8 +75,7 @@ public class TypingConsole implements KeyListener {
 			if (wordToCheck.toString().trim()
 					.equalsIgnoreCase(correctWord.trim())) {
 				System.out.println("CORRECT");
-				controller.establishConnectionWithMessage(controller
-						.getUsername());
+				controller.establishConnectionWithMessage(controller.getUsername());
 				userInputtedWord.clear(); // clears array of chars that user
 											// just typed
 				challengeWord.setNewWord();
@@ -115,6 +118,17 @@ public class TypingConsole implements KeyListener {
 	@Override
 	public void keyPressed(KeyEvent arg0) {
 		// TODO Auto-generated method stub
-		
+	}
+	
+	public static void main(String[] args0) {
+		JFrame gui = new JFrame();
+		TypingConsole typingConsole = new TypingConsole();
+		WordToType challengeWord = typingConsole.getWordToType();
+		gui.getContentPane().setLayout(new BorderLayout());
+		//gui.getContentPane().add(typingConsole.getJTextField(), BorderLayout.SOUTH);
+		gui.getContentPane().add(challengeWord.getJTextPane(), BorderLayout.CENTER);
+		gui.setSize(500,100);
+		gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		gui.setVisible(true);
 	}
 }

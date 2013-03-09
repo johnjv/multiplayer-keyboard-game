@@ -8,18 +8,19 @@ public class WordToType { // TODO could use better variable name
 
 	private StyleContext context;
 	private StyledDocument document;
-	private Style style = context.getStyle(StyleContext.DEFAULT_STYLE);
+	private Style style;
 
 	public WordToType() {
 		wordsList = new Words();
-		wordToType = new JTextPane(document);
-		wordToType.setEditable(false);
-		
-		wordToType.setSize(100, 100); //TODO should this class set size, or should this fall upon GUI class?
 		
 		context = new StyleContext();
 		document = new DefaultStyledDocument(context);
 		style = context.getStyle(StyleContext.DEFAULT_STYLE);
+		
+		wordToType = new JTextPane(document);
+		wordToType.setEditable(false);
+		
+		wordToType.setSize(100, 100); //TODO should this class set size, or should this fall upon GUI class?
 		
 		setDefaultStyle();
 		
@@ -30,6 +31,7 @@ public class WordToType { // TODO could use better variable name
 		StyleConstants.setAlignment(style, StyleConstants.ALIGN_CENTER);
 		StyleConstants.setFontSize(style, 30);
 		StyleConstants.setForeground(style, Color.black);
+		StyleConstants.setBackground(style, Color.green);
 	}
 	
 	public void setNewWord() {
