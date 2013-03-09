@@ -1,23 +1,26 @@
 import java.awt.*;
-import java.util.*;
 import javax.swing.*;
 import javax.swing.text.*;
 
-public class WordToType { // TODO could def use better variable name
+public class WordToType { // TODO could use better variable name
 	private JTextPane wordToType;
 	private Words wordsList;
 
-	private StyleContext context = new StyleContext();
-	private StyledDocument document = new DefaultStyledDocument(context);
+	private StyleContext context;
+	private StyledDocument document;
 	private Style style = context.getStyle(StyleContext.DEFAULT_STYLE);
 
 	public WordToType() {
 		wordsList = new Words();
 		wordToType = new JTextPane(document);
-		
 		wordToType.setEditable(false);
-		wordToType.setSize(100, 100);
-	
+		
+		wordToType.setSize(100, 100); //TODO should this class set size, or should this fall upon GUI class?
+		
+		context = new StyleContext();
+		document = new DefaultStyledDocument(context);
+		style = context.getStyle(StyleContext.DEFAULT_STYLE);
+		
 		setDefaultStyle();
 		
 		setNewWord();
@@ -29,11 +32,8 @@ public class WordToType { // TODO could def use better variable name
 		StyleConstants.setForeground(style, Color.black);
 	}
 	
-
 	public void setNewWord() {
-		Random randomGenerator = new Random();
-		int randomInteger = randomGenerator.nextInt(8000);
-		wordToType.setText(wordsList.getWord(randomInteger));
+		wordToType.setText(wordsList.getRandomWord());
 	}
 
 	public JTextPane getJTextPane() {

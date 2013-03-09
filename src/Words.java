@@ -3,11 +3,11 @@ import java.util.*;
 
 public class Words {
 	private Scanner scanner;
-	private ArrayList<String> wordList;
+	private ArrayList<String> wordsList;
 	private static final String FILE_PATH = "fiveletterwords.txt";
 
 	public Words() {
-		wordList = new ArrayList<String>();
+		wordsList = new ArrayList<String>();
 
 		try {
 			scanner = new Scanner(new File(FILE_PATH));
@@ -17,22 +17,22 @@ public class Words {
 
 		scanner.useDelimiter("\\s");
 		while (scanner.hasNext()) {
-			wordList.add(scanner.next());
+			wordsList.add(scanner.next());
 		}
 	}
 
 	public int getSize() {
-		return wordList.size();
+		return wordsList.size();
 	}
 
 	public String getWord(int index) {
-		return wordList.get(index);
+		return wordsList.get(index);
+	}
+	
+	public String getRandomWord() {
+		Random randomGenerator = new Random();
+		int randomInteger = randomGenerator.nextInt(wordsList.size());
+		return getWord(randomInteger);
 	}
 
-	public static void main(String[] args) {
-		Words wordTest = new Words();
-		for (int i = 0; i < wordTest.getSize(); i++) {
-			System.out.println(wordTest.getWord(i));
-		}
-	}
 }
