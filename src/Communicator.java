@@ -43,17 +43,35 @@ public class Communicator extends Thread {
 		if (inputLine.equals("null")) {
 			inputLine = null;
 		}
-		while (inputLine != null) {
-			if (!updateNetwork(inputLine)) {
-				updatePlayer(inputLine);
-			}
-			out.println(inputLine);
-			inputLine = in.readLine();
-		}
+//		while (inputLine != null) {
+//			if (!updateNetwork(inputLine)) {
+//				updatePlayer(inputLine);
+//			}
+//			out.println(inputLine);
+//			inputLine = in.readLine();
+//		}
 
 		out.close();
 		in.close();
 		socket.close();
+		if (inputLine != null) {		
+			if (inputLine.startsWith("TR")) {
+				inputLine = inputLine.replace("TR", " ").trim();
+				handleMessage(inputLine);
+				System.out.println("'" + inputLine + "'");
+			}
+		}
+	}
+	
+	private void handleMessage(String message) {
+		if (message.startsWith("connect")) {
+			message = message.replace("connect", " ").trim();
+			updateNetwork(message);
+		}
+		else if (message.startsWith("update")) {
+			message = message.replace("update", " ").trim();
+			updatePlayer(message);
+		}
 	}
 
 	private boolean updateNetwork(String string) {

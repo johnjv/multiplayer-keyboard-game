@@ -1,11 +1,14 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.sound.sampled.*;
 import javax.swing.JFrame;
 import javax.swing.text.*;
 
-public class TypingConsole implements KeyListener {
+public class TypingConsole implements KeyListener, Runnable {
 	private ArrayList<Character> userInputtedWord; 
 	private WordToType challengeWord;
 	private Controller controller;
@@ -15,6 +18,10 @@ public class TypingConsole implements KeyListener {
 
 		challengeWord = new WordToType();
 		challengeWord.getJTextPane().addKeyListener(this);
+		challengeWord.getJTextPane().setOpaque(true);
+		
+		
+		
 	}
 
 	public WordToType getWordToType() {
@@ -35,55 +42,108 @@ public class TypingConsole implements KeyListener {
 	private void setGreenStyle() { //TODO rename
 		StyledDocument document = challengeWord.getStyledDocument();
 		Style correctStyle = challengeWord.getJTextPane().addStyle("Green", null);
-
 		StyleConstants.setForeground(correctStyle, Color.green);
 		StyleConstants.setBold(correctStyle, true);
 		document.setCharacterAttributes(0, userInputtedWord.size(), challengeWord.getJTextPane().getStyle("Green"), true);
-		
-		/*
-		StyleConstants.setBackground(correctStyle, green);
+	}
+	
+	private void setRedStyle() { //TODO rename
+		StyledDocument document = challengeWord.getStyledDocument();
+		Style correctStyle = challengeWord.getJTextPane().addStyle("Red", null);
+		StyleConstants.setForeground(correctStyle, Color.red);
+		StyleConstants.setBold(correctStyle, true);
+		document.setCharacterAttributes(0, challengeWord.getLength(), challengeWord.getJTextPane().getStyle("Red"), true);
+	}
+	
+	private String buildString() {
+		StringBuilder wordToBuild = new StringBuilder();
+		for (int i = 0; i < userInputtedWord.size(); i++) {
+			wordToBuild.append(userInputtedWord.get(i));
+		}
+		return wordToBuild.toString();
+	}
+	
+	private void resetTypingConsole() {
+		userInputtedWord.clear(); 
+		challengeWord.setNewWord();
+	}
+	
+	private void playCorrectSound() {
 		try {
-			document.insertString(document.getLength(), "Some Text", correctStyle);
-		} catch (BadLocationException e) {
+			AudioInputStream audio = AudioSystem.getAudioInputStream(new File("correct.wav"));
+			Clip clip = AudioSystem.getClip();
+			clip.open(audio);
+			clip.start();
+		} catch (UnsupportedAudioFileException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (LineUnavailableException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		 */
+		
 	}
-	public void checkIfCorrect() {
+	
+	private void playIncorrectSound() {
+		try {
+			AudioInputStream audio = AudioSystem.getAudioInputStream(new File("incorrect.wav"));
+			Clip clip = AudioSystem.getClip();
+			clip.open(audio);
+			clip.start();
+		} catch (UnsupportedAudioFileException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (LineUnavailableException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public void checkIfCorrect() throws Throwable { //TODO read up on exceptions for threads
 		String correctWord = challengeWord.getWord();
 		int index = userInputtedWord.size() - 1;
+		final int SLEEP_TIME = 500;
 		
-		StringBuilder wordToCheck = new StringBuilder(); //TODO could build this into method
-		for (int i = 0; i < userInputtedWord.size(); i++) {
-			wordToCheck.append(userInputtedWord.get(i));
-		}
-
 		if (userInputtedWord.get(index) == challengeWord.getCharacter(index)) {
-			setGreenStyle();
-			
-			
-		} else if (userInputtedWord.get(index) != challengeWord.getCharacter(index)) {
+			setGreenStyle();			
+		} 
+		
+		else if (userInputtedWord.get(index) != challengeWord.getCharacter(index)) { //start thread in this method
 			System.out.println("INCORRECT");
-			userInputtedWord.clear(); 
-			challengeWord.setNewWord();
+			playIncorrectSound();
+			setRedStyle();
+			challengeWord.getJTextPane().setBackground(Color.red);
+			Thread.sleep(SLEEP_TIME);
+			challengeWord.getJTextPane().setBackground(Color.white);
+			resetTypingConsole();
 		}
 
 		if (userInputtedWord.size() == challengeWord.getLength()) {
+			String wordToCheck = buildString();
+			
 			System.out.println("wordToCheck: " + wordToCheck);
 			System.out.println("correctWord: " + correctWord);
-			if (wordToCheck.toString().trim()
-					.equalsIgnoreCase(correctWord.trim())) {
+			
+			if (wordToCheck.toString().trim().equalsIgnoreCase(correctWord.trim())) {
 				System.out.println("CORRECT");
+				playCorrectSound();
+				challengeWord.getJTextPane().setBackground(Color.green);
+				Thread.sleep(SLEEP_TIME);
+				challengeWord.getJTextPane().setBackground(Color.white);
 				controller.establishConnectionWithMessage(controller.getUsername());
-				userInputtedWord.clear(); // clears array of chars that user
-											// just typed
-				challengeWord.setNewWord();
+				resetTypingConsole();
 			} else {
 				System.out.println("INCORRECT");
-				userInputtedWord.clear(); // clears array of chars that user
-											// just typed
-				challengeWord.setNewWord();
+				playIncorrectSound();
+				Thread.sleep(SLEEP_TIME);
+				resetTypingConsole();
 			}
 		}
 
@@ -101,18 +161,20 @@ public class TypingConsole implements KeyListener {
 		if (arg0.getKeyCode() == KeyEvent.VK_ENTER) {
 		}
 
-		else if (userInputtedWord.size() == challengeWord.getLength()) {
-			checkIfCorrect();
-			userInputtedWord.clear();
-			challengeWord.setNewWord();
-		}
+//		else if (userInputtedWord.size() == challengeWord.getLength()) {
+//			checkIfCorrect();
+//			//userInputtedWord.clear();
+//			//challengeWord.setNewWord();
+//		}
 
 		else if (userInputtedWord.size() < challengeWord.getLength()) {
+			//challengeWord.getJTextPane().setBackground(Color.white);
 			userInputtedWord.add(arg0.getKeyChar());
-			checkIfCorrect();
+			
 		}
-		// TODO Auto-generated method stub
-
+		//checkIfCorrect();
+		Thread thread = new Thread(this);
+		thread.start();
 	}
 
 	@Override
@@ -130,5 +192,16 @@ public class TypingConsole implements KeyListener {
 		gui.setSize(500,100);
 		gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		gui.setVisible(true);
+	}
+
+	@Override
+	public void run() {
+		System.out.print("thread initiated");
+		try {
+			checkIfCorrect();
+		} catch (Throwable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

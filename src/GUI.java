@@ -1,9 +1,7 @@
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.util.HashMap;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.util.*;
 
 import javax.swing.*;
 
@@ -16,6 +14,7 @@ public class GUI extends JFrame {
 	private TypingConsole typingConsole;
 	private Controller controller;
 	private HashMap<String, Player> players;
+	private boolean gameIsRunning = true;
 
 	private int initPlayerY = 50;
 
@@ -38,33 +37,61 @@ public class GUI extends JFrame {
 	}
 
 	private void set() {
-		this.setSize(900, 600);
+		this.setSize(1200, 800);
 		this.setLayout(new BorderLayout());
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setVisible(true);
 	}
 
 	public void playerToPanel() {
-		playerPanel = new JPanel() { 
+
+		setBackground("background.jpg");
+		System.out.println("In playerToPanel");
+		this.add(playerPanel, BorderLayout.CENTER);
+	}
+
+	public void setBackground(String filename) {
+		final Image image = new ImageIcon(filename).getImage();
+		System.out.println("In setBackground");
+
+		playerPanel = new JPanel() {
 			public void paintComponent(Graphics g) {
 				super.paintComponent(g);
-				System.out.println("Repaint");
-				playerPanel.setBackground(Color.cyan);
-
+				System.out.println("Creating Background");
+				g.drawImage(image, 0, 0, getWidth(), getHeight(), null);
+				
 				for (String key : players.keySet()) {
 					players.get(key).draw(g);
 				}
 			}
 		};
-		playerPanel.setBackground(Color.cyan);
+
 		this.add(playerPanel, BorderLayout.CENTER);
+		this.setVisible(true);
+	}
+
+	public void setPlayers() {
+
 	}
 
 	private void finishPanel() {
-		finishPanel = new JPanel(new BorderLayout());
-		JLabel finish = new JLabel("FINISH");
-		finishPanel.add(finish, BorderLayout.EAST);
+		setFinishline("finishline.jpg");
+	}
+
+	public void setFinishline(String filename) {
+		final Image image = new ImageIcon(filename).getImage();
+
+		System.out.println("In setFinishline");
+		finishPanel = new JPanel() {
+			public void paintComponent(Graphics g) {
+				super.paintComponent(g);
+				System.out.println("Creating finish line");
+
+				g.drawImage(image, 0, 0, 100, getHeight(), null);
+			}
+		};
 		this.add(finishPanel, BorderLayout.EAST);
+
 	}
 
 	private void wordPanel() {
@@ -72,6 +99,7 @@ public class GUI extends JFrame {
 		wordPanel.add(typingConsole.getWordToType().getJTextPane(),
 				BorderLayout.EAST);
 		this.add(wordPanel, BorderLayout.SOUTH);
+		this.setVisible(true);
 	}
 
 	private void requirements() {
@@ -155,18 +183,20 @@ public class GUI extends JFrame {
 	}
 
 	public void movePlayer(String player) {
-
-		if (players.containsKey(player)) {
-			players.get(player).move(20);
-			checkForWin();
+		if (gameIsRunning) {
+			if (players.containsKey(player)) {
+				players.get(player).move(40);
+				checkForWin();
+			}
+			playerPanel.repaint();
 		}
-		playerPanel.repaint();
 	}
 
 	private void checkForWin() {
 		for (String key : players.keySet()) {
-			if (players.get(key).getX() > 860) {
+			if (players.get(key).getX() > 1200) {
 				finishGame(key);
+				gameIsRunning = false;
 			}
 		}
 	}

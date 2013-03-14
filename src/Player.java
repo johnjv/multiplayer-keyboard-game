@@ -1,10 +1,14 @@
 import java.awt.Graphics;
-
-import javax.swing.*;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.FileOutputStream;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 
 public class Player{
 
 	private String playerName;
+	private String[] playerIcons = {"p1.png", "p2.png", "p3.png", "p4.png", "p5.png", "p6.png"};
 	private int x, y;
 	private int size;
 
@@ -24,7 +28,15 @@ public class Player{
 	}
 
 	public void draw(Graphics g) {
-		g.fillRect(this.x, this.y, size, size);
+		int count = 1;
+		final Image image = new ImageIcon(playerIcons[count]).getImage();
+		g.drawImage(image, this.x, this.y, size, size, null);
 		g.drawString(this.playerName, this.x, this.y);
+		if(count == 6){
+			count = 1;
+		}else{
+			count++;
+		}
+	
 	}
 }
